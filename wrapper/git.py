@@ -1,4 +1,5 @@
 import subprocess
+from core.state import RepositoryState
 from core import state
 from core.commands import run_command
 
@@ -22,13 +23,18 @@ def get_current_branch():
     except subprocess.CalledProcessError:
         return "Unknown"
 
-def _check_repository():
-    """Return False if no repository is selected."""
-    if state.current_repository is None:
-        print("\nNo repository selected.")
-        return False
-    return True
+def get_repository_state():
 
+    if state.current_repository is None:
+        return RepositoryState.NO_REPOSITORY
+
+    if state.origin  == True:
+       return  RepositoryState.REMOTE_CONNECTED
+
+    return RepositoryState.LOCAL_ONLY
+
+def _check_repository():
+    return get_repository_state() != RepositoryState.NO_REPOSITORY
 
 def git_status():
     """Show git status."""

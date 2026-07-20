@@ -1,20 +1,33 @@
 from core.console import clear, header, pause
-from core.repositories import (
+from core.state import RepositoryState, ConsoleState
+
+from core.github import (
+    is_authenticated,
+    login,
+    create_repository,
+    clone_repository,
+    delete_repository,
+    list_repositories
+)
+
+from core.local_repositories import (
     load_repositories,
     select_repository,
     delete_repository,
     clone_repository,
 )
+
 from core.git import (
     git_status,
     git_pull,
     git_commit,
     git_push,
+    get_repository_state,
     quick_commit_push)
 
 
 def main():
-
+    print(get_repository_state())
     load_repositories()
 
     while True:
