@@ -1,153 +1,153 @@
 from core.commands import run_command
+from core.validators.github import GitHubValidator
 
-def _run_gh_command(args):
-    command = ["gh"]
-    command.extend(args)
-    return run_command(command)
+class GitHubWrapper:
+    """
+    Wrapper methods for the GitHub CLI.
+    """
 
-def is_authenticated():
-    return _run_gh_command(["auth", "status"])
+    def _run_gh_command(args):
+        command = ["gh"]
+        command.extend(args)
+        return run_command(command)
 
-def login():
-    return _run_gh_command(["auth", "login"])
+    def is_authenticated():
+        return _run_gh_command(["auth", "status"])
 
-def create_repository(repo_name, is_private):
-    if not repo_name.strip():
-     raise ValueError("repo_name cannot be empty.")
+    def login():
+        return _run_gh_command(["auth", "login"])
 
-    if not isinstance(is_private, bool):
-     raise TypeError("is_private must be a bool.")
+    @staticmethod
+    def create_repository(repo_name, is_private):
+        """creates a repository"""
 
-    args  = ["repo", "create", repo_name]
+        GitHubValidator.repository_name(repo_name)
+        GitHubValidator.private_flag(is_private)   
+        args  = ["repo", "create", repo_name]
 
-    if is_private:
-     args.append("--private")
-    else:
-     args.append("--public")
+        if is_private:
+         args.append("--private")
+        else:
+         args.append("--public")
 
-    return _run_gh_command(arg)
+        return _run_gh_command(arg)
 
-def delete_repository(repo_name):
-    if not repo_name.strip():
-     raise ValueError("repo_name cannot be empty.")
-     
-    args = ["repo", "delete", repo_name]
+     @staticmethod
+     def delete_repository(repo_name):
+         """Deletes a single repository"""
+        
+         GitHubValidator.repository_name(repo_name)
+         args = ["repo", "delete", repo_name]
     
-    return _run_gh_command(args)
+         return _run_gh_command(args)
 
-def query(gh_resource: GitHubResource,
-          resource_id: str | None = None):
+     def query(gh_resource: GitHubResource,
+               resource_id: str | None = None):
 
-    match  gh_resource:
+         match gh_resource:
 
-         case GitHubResource.WORKFLOW:
+             case GitHubResource.WORKFLOW:
 
-            args = [
-                    "workflow",
-                    "list",
-                    "--json",
-                    "name,id,path,state"]
+                  args = [
+                          "workflow",
+                          "list",
+                          "--json",
+                          "name,id,path,state"]
 
-         case GitHubResource.RELEASES:
+             case GitHubResource.RELEASES:
 
-            args = [
-                    "release",
-                    "list",
-                    "--json",
-                    "name,tagName,isDraft,isLatest,publishedAt,url"]
+                  args = [
+                          "release",
+                          "list",
+                          "--json",
+                          "name,tagName,isDraft,isLatest,publishedAt,url"]
 
-         case GitHubResource.ISSUES:
+             case GitHubResource.ISSUES:
 
-            args = [
-                    "issue",
-                    "list",
-                    "--json",
-                    "number,title,state,author,url,createdAt"]
+                  args = [
+                          "issue",
+                          "list",
+                          "--json",
+                          "number,title,state,author,url,createdAt"]
 
-         case GitHubResource.PULLREQUESTS:
+             case GitHubResource.PULLREQUESTS:
 
-            args = [
-                    "pr",
-                    "list",
-                    "--json",
-                    "number,title,state,author,url,createdAt"]
+                  args = [
+                          "pr",
+                          "list",
+                          "--json",
+                          "number,title,state,author,url,createdAt"]
 
-         case GitHubResource.REPOSITORY:
+             case GitHubResource.REPOSITORY:
 
-            args = [
-                    "repo",
-                    "list",
-                    "--json",
-                    "name,visibility,isPrivate,description,url"]
+                  args = [
+                          "repo",
+                          "list",
+                          "--json",
+                          "name,visibility,isPrivate,description,url"]
 
-         case GitHubResource.WORKFLOWRUNS:
+             case GitHubResource.WORKFLOWRUNS:
 
-            args = [
-                    "run",
-                    "list",
-                    "--json",
-                    "databaseId,workflowName,status,conclusion,event,createdAt,url"]
+                  args = [
+                          "run",
+                          "list",
+                          "--json",
+                          "databaseId,workflowName,status,conclusion,event,createdAt,url"]
 
-         case GitHubResource.GISTS:
+              case GitHubResource.GISTS:
 
-            args = [
-                    "gist",
-                    "view",
-                    resource_id,
-                    "--json",
-                    "id,description,public,createdAt,updatedAt,files,url"]
-
-            
-         case GitHubResource.LABLES:
-            
-           args = [
-                   "label",
-                   "list",
-                   "--json",
-                   "name,color,description"]
+                   args = [
+                           "gist",
+                           "view",
+                           resource_id,
+                           "--json",
+                           "id,description,public,createdAt,updatedAt,files,url"]
 
             
-         case GitHubResource.SECRETS:
+              case GitHubResource.LABLES:
+            
+                   args = [
+                           "label",
+                           "list",
+                           "--json",
+                           "name,color,description"]
 
-            args = [
-                    "secret",
-                    "list",
-                    "--json",
-                    "name,updatedAt,visibility"]
+            
+              case GitHubResource.SECRETS:
+
+                   args = [
+                           "secret",
+                           "list",
+                           "--json",
+                           "name,updatedAt,visibility"]
 
            
-         case GitHubResource.PROJECTS:
+              case GitHubResource.PROJECTS:
 
-            args = [
-                    "project",
-                    "list",
-                    "--json",
-                    "id,title,shortDescription,url"]
+                   args = [
+                           "project",
+                           "list",
+                           "--json",
+                           "id,title,shortDescription,url"]
 
            
-         case GitHubResource.ORGANIZATIONS
+              case GitHubResource.ORGANIZATIONS
   
-            args = [
-                    "org",
-                    "list",
-                    "--json",
-                    "login,name,url"]
-          case:
-             
-             raise ValueError("enum value outside of bounds")     
+                   args = [
+                           "org",
+                           "list",
+                           "--json",
+                           "login,name,url"]
+              case:   
+                   raise ValueError("enum value outside of bounds")     
       
-     return _run_gh_command(args)
+           return _run_gh_command(args)
 
 
-def clone_repository(repo_name, owner):
-    if not repo_name.strip():
-     raise ValueError("repo_name cannot be empty.")
-     
-    if not owner.strip():
-     raise ValueError("owner may not be empty")
-
-    args = ["repo", "clone",f"{owner}/{repo_name}"]
+     def clone_repository(repo_name, owner):
+   
+          args = ["repo", "clone",f"{owner}/{repo_name}"]
     
-    return _run_gh_command(args)
+          return _run_gh_command(args)
 
-create_repository("test-repo", True)
+
