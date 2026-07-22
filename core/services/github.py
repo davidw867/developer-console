@@ -1,4 +1,4 @@
-from wrapper.github import GitHubWrapper
+from wrappers.github import GitHubWrapper
 from core.enums.github_resource import GitHubResource
 
 # TODO (Future Service Features)
