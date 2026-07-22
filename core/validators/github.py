@@ -62,3 +62,9 @@ Validation methods for GitHub CLI operations.
 
        if not re.fullmatch(r"[0-9a-fA-F]+", gist_id):
          raise ValueError("gist_id must be a hexadecimal string.")
+     
+    @staticmethod
+    def gh_resource(gh_resource):
+      """Validate that gh_resource is an GitHubResource"""
+       if is not isinstance(gh_resource, GitHubResouce)
+         raise TypeError("gh_resource must be a GitHubResource.")    
