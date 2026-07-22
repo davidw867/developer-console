@@ -1,4 +1,5 @@
 import re
+from core.enums.github import GitHubResource
 
 class GitHubValidator:
 """

@@ -1,5 +1,5 @@
 from wrappers.github import GitHubWrapper
-from core.enums.github_resource import GitHubResource
+from core.enums.github import GitHubResource
 
 # TODO (Future Service Features)
 # - Authentication caching
