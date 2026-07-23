@@ -1,362 +1,501 @@
 # Developer Console Architecture
 
-Version: 1.0
-
----
-Architecture Laws
-
-1. Every class has one responsibility.
-
-2. Business logic belongs in Services.
-
-3. External communication belongs in Wrappers.
-
-4. Validation happens before execution.
-
-5. Models represent data, not behavior.
-
-6. Every production module has corresponding tests.
-
-7. Every integration follows the same folder structure.
-
-8. Favor readability over cleverness.
-
-9. Make invalid states impossible where practical.
-
-10. If a feature doesn't fit the architecture, improve 
-    the architecture before adding the feature.
----
-
-# Purpose
-
-The Developer Console is designed around a layered architecture.
-
-Each layer has a single responsibility and communicates only with the
-layers directly below it.
-
-This separation keeps the code maintainable, testable, and easy to
-extend.
+Version: 2.0
+Status: Active
+Last Updated: July 2026
 
 ---
 
-# Architecture
+# Overview
 
-```
-Console/UI
-     │
-     ▼
- Services
-     │
-     ▼
- Wrappers
-     │
-     ▼
- External APIs / CLI Tools
-```
+Developer Console is a lightweight, extensible developer toolkit designed to provide a consistent interface over multiple development tools, services, and APIs.
 
-Supporting Layers
+The project follows a domain-driven architecture emphasizing:
 
-```
-Enums
-Models
-Validators
-Caches
-Interfaces
-Exceptions
-```
+- Simplicity
+- Readability
+- Testability
+- Maintainability
+- Extensibility
+- Low resource usage
 
-These layers are shared throughout the application.
+The initial target platform is **Termux**. Once stable, support will expand to Linux, macOS, and Windows.
 
 ---
 
-# Layer Responsibilities
+# Guiding Philosophy
 
-## Console
+Developer Console exists to hide the complexity of external tooling while exposing a clean, consistent Python API.
 
-Responsible for:
-
-- User interaction
-- Displaying menus
-- Reading user input
-- Formatting output
-
-The console never communicates directly with GitHub, Git, or external
-services.
-
-Instead it calls the Service Layer.
-
----
-
-## Services
-
-Responsible for business logic.
+External tools should feel interchangeable.
 
 Examples:
 
-- Authentication workflow
-- Repository management
-- Confirmation prompts
-- Retry logic
-- Permission checks
-- Caching
-- Rate limiting
-
-Services coordinate multiple wrappers when necessary.
-
-Services never build CLI commands.
-
----
-
-## Wrappers
-
-Responsible for communication with external tools.
-
-Examples:
-
+- Git
 - GitHub CLI
-- Git CLI
-- Docker CLI
+- Docker
+- Kubernetes
+- Terraform
+- SSH
+- Local Filesystem
 
-Wrappers should:
+Every integration follows the same architectural rules.
 
-- Validate input
-- Build commands
-- Execute commands
-- Return results
+---
 
-Wrappers contain no business logic.
+# Architectural Laws
+
+## Law 1 — Single Responsibility
+
+Every module, class, and function has one clearly defined responsibility.
+
+If a component performs multiple unrelated tasks, it should be split.
+
+---
+
+## Law 2 — Domain First
+
+The project is organized around domains, not file types.
+
+Example:
+
+core/
+    services/
+        github/
+        git/
+
+instead of
+
+core/
+    github_services.py
+
+---
+
+## Law 3 — Separation of Concerns
+
+Responsibilities are separated into dedicated layers.
+
+Commands
+
+↓
+
+Validators
+
+↓
+
+Services
+
+↓
+
+Wrappers
+
+↓
+
+External Tool
+
+No layer should bypass another without a documented reason.
+
+---
+
+## Law 4 — Wrappers Never Contain Business Logic
+
+Wrappers only communicate with external systems.
+
+Wrappers:
+
+✓ Execute commands
+
+✓ Parse responses
+
+✓ Translate errors
+
+Wrappers do NOT:
+
+✗ Make business decisions
+
+✗ Validate user input
+
+✗ Implement workflows
+
+---
+
+## Law 5 — Services Own Business Logic
+
+Business decisions belong inside Services.
+
+Examples:
+
+✓ deciding execution order
+
+✓ coordinating wrappers
+
+✓ caching
+
+✓ retry policies
+
+✓ orchestration
+
+---
+
+## Law 6 — Validation Happens Before Execution
+
+Validation always occurs before commands are executed.
+
+Invalid input should never reach wrappers.
+
+---
+
+## Law 7 — Models Belong to Developer Console
+
+External APIs never leak into the rest of the application.
+
+Wrappers convert external data into Developer Console models.
+
+Example:
+
+Git CLI Output
+
+↓
+
+GitRepositoryModel
+
+↓
+
+Service
+
+↓
+
+Command
+
+---
+
+## Law 8 — Commands Represent User Actions
+
+Commands are the public entry point.
+
+Commands should remain thin.
+
+Commands delegate work to Services.
+
+---
+
+## Law 9 — Dependencies Point Downward
+
+Allowed:
+
+Commands
+
+↓
+
+Services
+
+↓
+
+Wrappers
+
+↓
+
+External APIs
+
+Forbidden:
+
+Wrappers importing Commands
+
+Models importing Services
+
+Enums importing Wrappers
+
+---
+
+## Law 10 — Consistency Over Cleverness
+
+A predictable codebase is better than a clever one.
+
+Follow established conventions unless there is a compelling reason not to.
+
+---
+
+## Law 11 — Test Everything Public
+
+Every public component should have tests.
+
+Production structure should be mirrored inside tests.
+
+---
+
+## Law 12 — Standard Library First
+
+Prefer Python's standard library.
+
+Third-party dependencies should only be introduced when they provide clear long-term value.
+
+---
+
+# High Level Architecture
+
+Commands
+    │
+    ▼
+Validators
+    │
+    ▼
+Services
+    │
+    ▼
+Wrappers
+    │
+    ▼
+External Tools
+
+---
+
+# Core Components
+
+## Commands
+
+Represent user actions.
+
+Examples:
+
+- Clone Repository
+- Push
+- Doctor
+- Status
+
+Commands never contain business logic.
 
 ---
 
 ## Validators
 
-Responsible for validating input.
+Responsible for verifying input.
 
 Examples:
 
-- Repository names
-- Branch names
-- Issue numbers
-- Workflow identifiers
-
-Validators never execute commands.
-
-Validators never perform business logic.
+- Path validation
+- URL validation
+- Configuration validation
 
 ---
 
-## Models
+## Services
 
-Represent application data.
+Coordinate workflows.
 
 Examples:
 
-- Repository
-- Pull Request
-- Workflow
-- User
-
-Models should not perform external operations.
+- Repository initialization
+- Retry logic
+- Multi-step operations
+- Cache management
 
 ---
 
-## Enums
+## Wrappers
 
-Provide strongly typed constants.
+Low-level communication layer.
 
 Examples:
 
-- GitHub resources
-- Menu options
-- Integration types
+- Git CLI
+- GitHub CLI
+- Filesystem
+- Terminal
 
-Enums eliminate magic strings.
+Wrappers should be easily replaceable.
 
 ---
 
 ## Interfaces
 
-Define contracts between layers.
+Define contracts.
 
-Interfaces allow implementations to be replaced without changing
-dependent code.
+Interfaces make implementations interchangeable.
 
 ---
 
-## Caches
+## Models
 
-Store temporary application state.
+Represent Developer Console's domain objects.
 
 Examples:
 
-- Authentication tokens
-- Current user
-- Repository metadata
-- Rate limit information
+GitRepositoryModel
 
-Caches never become the source of truth.
+GitStatusModel
+
+GitHubRepositoryModel
+
+IssueModel
+
+---
+
+## Enums
+
+Represent fixed sets of values.
+
+Enums are grouped by domain.
 
 ---
 
 ## Exceptions
 
-Contain application-specific exception classes.
+Provide meaningful, typed errors.
+
+Never raise generic Exception when a domain-specific exception exists.
+
+---
+
+# Command Organization Principle
+
+Commands are organized by the external tool they wrap.
+
+Example:
+
+commands/git/
+
+wraps Git CLI
+
+commands/github/
+
+wraps GitHub CLI
+
+Even if both perform similar operations, they remain separate because they represent different tools.
+
+---
+
+# Directory Organization Principle
+
+Every major component follows the same domain structure.
+
+Example:
+
+services/
+    github/
+
+validators/
+    github/
+
+wrappers/
+    github/
+
+models/
+    github/
+
+interfaces/
+    github/
+
+This consistency reduces cognitive load.
+
+---
+
+# Naming Conventions
+
+Packages
+
+snake_case
+
+Modules
+
+snake_case
+
+Classes
+
+PascalCase
+
+Functions
+
+snake_case
+
+Constants
+
+UPPER_CASE
+
+Enums
+
+PascalCase
+
+Exceptions
+
+End with Exception
+
+Wrappers
+
+End with Wrapper
+
+Validators
+
+End with Validator
+
+Services
+
+End with Service
+
+Models
+
+End with Model
+
+Providers
+
+End with Provider
+
+---
+
+# Testing Philosophy
+
+Tests mirror production.
+
+Example:
+
+core/services/github/
+
+↓
+
+tests/test_services/github/
+
+Tests should verify:
+
+- success paths
+- failure paths
+- edge cases
+- invalid input
+
+---
+
+# Future Expansion
+
+Developer Console is designed to support additional providers without architectural changes.
 
 Examples:
 
-- AuthenticationError
-- RepositoryNotFound
-- InvalidWorkflowIdentifier
+Docker
 
-This provides consistent error handling throughout the application.
+Kubernetes
 
----
+Terraform
 
-# Dependency Rules
+AWS
 
-Allowed
+Azure
 
-Console
-↓
+GitLab
 
-Services
-↓
+Bitbucket
 
-Wrappers
-↓
+SSH
 
-External Tools
+SQLite
 
-Shared layers
+PostgreSQL
 
-Validators
-Models
-Enums
-Caches
-Interfaces
-Exceptions
+REST APIs
 
-may be referenced where appropriate.
+Each provider should follow the same architectural principles.
 
 ---
 
-Forbidden
+# Final Principle
 
-Console → Wrappers
+Architecture exists to make future development easier.
 
-Console → GitHub CLI
-
-Wrappers → Services
-
-Validators → Wrappers
-
-Validators → Services
-
-Models → Wrappers
-
-Business logic inside wrappers.
-
----
-
-# Folder Structure
-
-```
-core/
-    caches/
-    enums/
-    exceptions/
-    interfaces/
-    models/
-    services/
-    validators/
-
-wrappers/
-
-tests/
-
-docs/
-```
-
-Each integration should follow the same structure.
-
-Example
-
-```
-GitHub
-
-github.py
-validators/github.py
-services/github.py
-wrappers/github.py
-models/github.py
-caches/github.py
-interfaces/igithub.py
-exceptions/github.py
-tests/.../github.py
-```
-
-Future integrations should mirror this layout.
-
-Examples
-
-- Git
-- Docker
-- Kubernetes
-- AWS
-- Azure
-- Terraform
-
----
-
-# Testing Strategy
-
-Every production module should have a corresponding test module.
-
-Example
-
-```
-services/github.py
-↓
-
-tests/test_services/github.py
-```
-
-This mirrored structure keeps tests easy to locate.
-
----
-
-# Design Principles
-
-The Developer Console follows these principles:
-
-- Single Responsibility Principle
-- Separation of Concerns
-- Composition over inheritance
-- Explicit validation
-- Consistent error handling
-- Layered architecture
-- Strong typing
-- Test-first mindset
-- Reusable integrations
-
----
-
-# Development Workflow
-
-When implementing a new integration:
-
-1. Create enums
-2. Create models
-3. Create validators
-4. Create wrappers
-5. Create services
-6. Create interfaces
-7. Create caches
-8. Create exceptions
-9. Write tests
-10. Update documentation
-
-Following this workflow ensures every integration has a consistent
-architecture.
-
-
+If a design decision makes future contributors more productive while preserving simplicity, it is likely the correct decision.

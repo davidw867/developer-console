@@ -1,6 +1,6 @@
 from core.commands import run_command
 from core.validators.github import GitHubValidator
-from core.enums.github_resource import GitHubResource
+from core.enums.github.resource import GitHubResource
 
 class GitHubWrapper:
       """

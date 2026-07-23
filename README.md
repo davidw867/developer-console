@@ -160,3 +160,10 @@ before submitting changes.
 Licensed under the Apache License, Version 2.0.
 
 See the LICENSE file for details.
+---
+
+## Copyright
+
+Copyright © 2026 David Anthony Workman
+
+Licensed under the Apache License, Version 2.0.
