@@ -1,0 +1,277 @@
+# Developer Console
+
+## A Lightweight, Termux-First Developer Automation Framework
+
+Developer Console is a modular Python framework for interacting with developer tools, source-control providers, repositories, terminals, cloud platforms, container systems, and local filesystems through one consistent architecture.
+
+> A developer console should be powerful enough to grow, but lightweight enough to run comfortably inside Termux.
+
+## Project Vision
+
+Developer Console is intended to work locally on Android through Termux, run on Linux with minimal changes, and later expand to Windows and macOS after the Termux implementation is stable. It supports multiple providers without coupling the core to any one platform and keeps commands, behavior, and results transparent and testable.
+
+## Current Status
+
+- Architecture version: 1.0
+- Architecture status: Frozen
+- Development phase: Core implementation
+- Primary target: Termux
+- Secondary target: Linux
+- Future targets: Windows and macOS
+
+The foundational package structure is complete. Future work should prioritize implementation, tests, reliability, and packaging rather than architectural restructuring.
+
+## Core Identity
+
+Developer Console is lightweight, provider-based, interface-driven, testable, extensible, command-oriented, and designed around separation of concerns. It is not a full IDE, graphical desktop environment, or replacement for provider tools such as Git, GitHub, Docker, or cloud CLIs.
+
+---
+
+# Developer Console — Features and Design Philosophy
+
+## Key Features
+
+Developer Console uses a modular core, provider abstraction, a command-oriented interface, a service layer, wrappers for external systems, validators, centralized logging, dependency injection, and a controlled event system.
+
+Provider-specific behavior is isolated under folders such as `git`, `github`, `gitlab`, `bitbucket`, `aws`, `azure`, `docker`, `kubernetes`, `filesystem`, `repository`, and `terminal`.
+
+## Design Philosophy
+
+### Lightweight Before Feature-Rich
+Every dependency and abstraction must justify its cost. The standard library is preferred when it provides a clear and maintainable solution.
+
+### Termux First
+The first stable distribution must install and run cleanly in Termux. Broader operating-system support follows after that foundation is dependable.
+
+### Explicit Over Magical
+The project favors direct construction, named dependencies, readable control flow, and transparent behavior over hidden registration or heavy metaprogramming.
+
+### Stable Core, Replaceable Providers
+Core contracts should change slowly. Provider implementations may evolve as external APIs and tools change.
+
+### Test Every Layer
+Tests are written as implementation proceeds. Every commit should leave the project working.
+
+---
+
+# Developer Console — Installation and Quick Start
+
+## Installation Status
+
+Developer Console is entering implementation. These commands define the intended package workflow and will be finalized with the first runnable release.
+
+## Termux Quick Start
+
+```bash
+pkg update
+pkg upgrade
+pkg install python git
+git clone <repository-url>
+cd developer-console
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+Run the console:
+
+```bash
+developer-console
+```
+
+During early development:
+
+```bash
+python -m developer_console
+```
+
+## Linux Quick Start
+
+```bash
+git clone <repository-url>
+cd developer-console
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .
+developer-console
+```
+
+## Development Installation
+
+```bash
+python -m pip install -e ".[dev]"
+pytest
+ruff check .
+mypy .
+```
+
+Sensitive values must be supplied through environment variables or user configuration files and must never be committed.
+
+---
+
+# Developer Console — Project Structure
+
+```text
+developer-console/
+├── core/
+├── docs/
+├── tests/
+├── main.py
+├── pyproject.toml
+├── README.md
+├── ARCHITECTURE.md
+└── CONTRIBUTING.md
+```
+
+## Core Package
+
+```text
+core/
+├── commands/
+├── constants/
+├── dependency_injection/
+├── enums/
+├── events/
+├── exceptions/
+├── interfaces/
+├── logging/
+├── models/
+├── services/
+├── tests/
+├── utils/
+├── validators/
+└── wrappers/
+```
+
+Provider folders may appear under commands, constants, enums, exceptions, interfaces, models, services, validators, and wrappers.
+
+Commands receive user intent. Services coordinate use cases. Wrappers isolate external systems. Interfaces define contracts. Models carry data. Validators protect boundaries. Exceptions communicate meaningful failures. Utilities remain small and stateless. Logging is centralized. Events describe completed or attempted actions without becoming a hidden business-logic layer.
+
+---
+
+# Developer Console — Development Workflow
+
+## Standard Workflow
+
+1. Implement one focused behavior.
+2. Add or update tests.
+3. Run the relevant test suite.
+4. Run formatting and static checks.
+5. Verify the application still starts.
+6. Commit a working state.
+
+## Recommended Implementation Order
+
+1. Constants
+2. Configuration
+3. Logging
+4. Utilities
+5. Models
+6. Exceptions
+7. Interfaces
+8. Validators
+9. Wrappers
+10. Services
+11. Dependency Injection
+12. Commands
+13. Events
+14. `main.py`
+
+## Branching
+
+`main` must remain stable. Feature work should use focused branches. Large architectural changes require an Architecture Decision Record.
+
+## Definition of Done
+
+Work is complete when implementation matches its interface, validation is present where needed, errors are meaningful, tests pass, logging is appropriate, documentation is updated, and the project remains installable and runnable.
+
+---
+
+# Developer Console — Testing, Logging, and Dependency Injection
+
+## Testing Strategy
+
+Unit tests should cover models, validators, utilities, services, wrappers with mocked external dependencies, commands with mocked services, and dependency construction.
+
+Integration tests should verify boundaries such as Git subprocess behavior, filesystem operations, provider integration, configuration loading, and command-to-service execution. Live provider tests should be optional and clearly marked.
+
+## Logging
+
+```text
+core/logging/
+├── __init__.py
+├── logger.py
+├── formatters.py
+└── handlers.py
+```
+
+Application modules request a logger rather than configuring handlers independently. Logs must identify operations, include useful context, avoid exposing secrets, use suitable levels, and remain readable in Termux.
+
+## Dependency Injection
+
+Dependencies are passed into constructors or factories. Services must not create provider clients directly. This improves testing, replaceability, ownership clarity, and configuration control while avoiding a heavy framework.
+
+---
+
+# Developer Console — Roadmap and Contributing
+
+## Roadmap
+
+### Milestone 1 — Core Foundation
+Constants, configuration, logging, utilities, and initial tests.
+
+### Milestone 2 — Git and Repository Support
+Models, interfaces, validators, wrappers, repository services, and basic commands.
+
+### Milestone 3 — GitHub Reference Provider
+Authentication, repository operations, issue and pull-request foundations, error normalization, and provider tests.
+
+### Milestone 4 — Termux Package
+Installable package, shell entry point, dependency audit, installation guide, upgrade process, and uninstall process.
+
+### Later Milestones
+GitLab, Bitbucket, Docker, filesystem, terminal, Linux stabilization, Windows, macOS, AWS, Azure, and Kubernetes.
+
+## Contributing
+
+Read `ARCHITECTURE.md`, keep changes focused, add tests, and update documentation. Provider contributions must not bypass interfaces or place provider-specific behavior in generic services.
+
+Architecture version 1.0 is frozen. Structural changes require an ADR describing context, decision, alternatives, consequences, and migration impact.
+
+---
+
+# Developer Console — Reference and Project Policies
+
+## Provider Status
+
+| Category | Status |
+|---|---|
+| Git | Planned core implementation |
+| GitHub | Reference provider |
+| GitLab | Planned |
+| Bitbucket | Planned |
+| Filesystem | Planned |
+| Repository | Planned |
+| Terminal | Planned |
+| Docker | Planned |
+| Kubernetes | Future |
+| AWS | Future |
+| Azure | Future |
+
+## Naming
+
+Packages, modules, functions, and variables use `snake_case`. Classes use `PascalCase`. Constants use `UPPER_SNAKE_CASE`.
+
+## Security
+
+Never log credentials, commit tokens, execute unsanitized shell strings, or expose private provider data. Validate external input, normalize provider errors, use least-privilege credentials, and prefer structured subprocess arguments.
+
+## Performance
+
+Avoid heavy startup work, unnecessary background processes, and provider loading that is not needed. Keep Termux memory and storage limits in mind.
+
+## License
+
+A license should be selected before the first public release. Until then, the repository should clearly state that public reuse rights have not been granted.
