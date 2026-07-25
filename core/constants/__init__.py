@@ -49,6 +49,21 @@ from core.constants.filesystem import (
     USER_HOME_DIRECTORY,
 )
 
+#------------------------------------------------------------------
+# Environment Constants
+#------------------------------------------------------------------
+from core.constants.environment import (
+    HOME_ENVIRONMENT_VARIABLE,
+    PATH_ENVIRONMENT_VARIABLE,
+    SHELL_ENVIRONMENT_VARIABLE,
+    TERM_ENVIRONMENT_VARIABLE,
+    TMP_ENVIRONMENT_VARIABLE,
+    USER_ENVIRONMENT_VARIABLE,
+    TEMP_ENVIRONMENT_VARIABLE,
+    LANG_ENVIRONMENT_VARIABLE,
+    HOSTNAME_ENVIRONMENT_VARIABLE,
+)
+
 __all__: list[str] = [
 #------------------------------------------------------------------
 # Application Constants
@@ -85,4 +100,17 @@ __all__: list[str] = [
     "YAML_EXTENSION",
     "LOG_EXTENSION",
     "USER_HOME_DIRECTORY",
+
+#------------------------------------------------------------------
+# Environmemt Constants
+#------------------------------------------------------------------
+    "HOME_ENVIRONMENT_VARIABLE",
+    "PATH_ENVIRONMENT_VARIABLE",
+    "SHELL_ENVIRONMENT_VARIABLE",
+    "TERM_ENVIRONMENT_VARIABLE",
+    "TMP_ENVIRONMENT_VARIABLE",
+    "USER_ENVIRONMENT_VARIABLE",
+    "TEMP_ENVIRONMENT_VARIABLE",
+    "LANG_ENVIRONMENT_VARIABLE",
+    "HOSTNAME_ENVIRONMENT_VARIABLE",
 ]
